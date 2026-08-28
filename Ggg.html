@@ -3,16 +3,20 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
 <title>Другие детали тоже нужны, тут собраны самые характерные.</title>
 
 <style>
-*{box-sizing:border-box}
+
+*{
+    box-sizing:border-box;
+}
 
 body{
     margin:0;
     background:#111;
     color:white;
-    font-family:Arial,sans-serif
+    font-family:Arial,sans-serif;
 }
 
 header{
@@ -21,24 +25,24 @@ header{
     background:#181818;
     position:sticky;
     top:0;
-    z-index:10
+    z-index:10;
 }
 
 h1{
     margin:0 0 5px;
-    font-size:21px
+    font-size:21px;
 }
 
 #counter{
     color:#aaa;
-    font-size:14px
+    font-size:14px;
 }
 
 .top-controls{
     display:flex;
     align-items:center;
     justify-content:center;
-    gap:12px
+    gap:12px;
 }
 
 .top-controls button{
@@ -47,239 +51,416 @@ h1{
     border:none;
     border-radius:8px;
     padding:8px 12px;
-    font-size:14px
+    font-size:14px;
 }
 
 .top-controls button:active{
-    transform:scale(.96)
+    transform:scale(.96);
 }
+
+
+/* ==================================================
+   ОСНОВНАЯ ОБЛАСТЬ
+================================================== */
 
 .viewer{
     padding:15px 10px 20px;
+
     display:flex;
     flex-direction:column;
     align-items:center;
-    justify-content:flex-start
+    justify-content:flex-start;
 }
 
 #caption{
     width:100%;
     max-width:900px;
+
     text-align:center;
+
     font-size:18px;
     line-height:1.5;
+
     margin-bottom:15px;
+
     padding:0 10px;
-    color:#eee
+
+    color:#eee;
 }
 
 .photo-container{
     width:100%;
+
     display:flex;
+
     justify-content:center;
-    align-items:center
+    align-items:center;
 }
 
 #photo{
     width:100%;
     height:auto;
+
     max-width:100%;
+
     border-radius:5px;
+
     user-select:none;
     -webkit-user-drag:none;
+
     display:block;
-    object-fit:contain
+
+    object-fit:contain;
 }
+
+
+/* ==================================================
+   БОЛЬШАЯ ГАЛЕРЕЯ
+================================================== */
 
 .gallery{
     width:100%;
-    padding:20px 10px 100px
+
+    padding:20px 10px 100px;
 }
 
 .gallery-group{
-    margin-bottom:30px
+    margin-bottom:30px;
 }
 
 .gallery-group-title{
     font-size:18px;
     font-weight:bold;
+
     text-align:center;
+
     margin-bottom:12px;
-    color:#eee
+
+    color:#eee;
 }
 
 .gallery-grid{
     display:grid;
-    grid-template-columns:repeat(4,1fr);
-    gap:8px
+
+    grid-template-columns:
+        repeat(4,1fr);
+
+    gap:8px;
 }
 
 .gallery-item{
     width:100%;
+
     aspect-ratio:1/1;
+
     object-fit:cover;
+
     border-radius:5px;
+
     cursor:pointer;
+
     opacity:.75;
+
     border:3px solid transparent;
-    transition:opacity .15s,border-color .15s
+
+    transition:
+        opacity .15s,
+        border-color .15s;
 }
 
 .gallery-item:hover{
-    opacity:1
+    opacity:1;
 }
 
 .gallery-item.active{
     opacity:1;
-    border:3px solid white
+
+    border:3px solid white;
 }
+
+
+/* ==================================================
+   НИЖНЯЯ ФИКСИРОВАННАЯ ЛЕНТА
+================================================== */
 
 .thumbs{
     position:fixed;
+
     bottom:0;
     left:0;
     right:0;
+
     background:#181818;
+
     display:flex;
+
     gap:6px;
+
     overflow-x:auto;
+
     padding:7px;
-    z-index:20
+
+    z-index:20;
 }
 
 .thumbs img{
     width:62px;
     height:62px;
+
     flex:0 0 62px;
+
     object-fit:cover;
+
     border-radius:5px;
+
     opacity:.55;
-    cursor:pointer
+
+    cursor:pointer;
 }
 
 .thumbs img.active{
     opacity:1;
-    outline:2px solid white
+
+    outline:2px solid white;
 }
 
-/* Полноэкранное окно */
+
+/* ==================================================
+   ПОЛНОЭКРАННОЕ ФОТО
+================================================== */
 
 #fullscreen{
+
     position:fixed;
-    inset:0;
-    background:rgba(0,0,0,.96);
+
+    top:0;
+    left:0;
+    right:0;
+    bottom:0;
+
+    width:100vw;
+    height:100vh;
+
+    background:rgba(0,0,0,.97);
+
     display:none;
+
     align-items:center;
     justify-content:center;
-    z-index:1000;
-    padding:10px;
-    touch-action:manipulation
+
+    z-index:99999;
+
+    padding:5px;
+
+    overflow:hidden;
+
+    touch-action:manipulation;
 }
+
+
+/*
+Когда полноэкранное окно открыто
+*/
+
+#fullscreen.show{
+
+    display:flex;
+}
+
+
+/*
+Фотография во весь экран
+*/
 
 #fullscreen img{
-    max-width:100%;
-    max-height:100%;
+
+    display:block;
+
     width:auto;
     height:auto;
+
+    max-width:100vw;
+    max-height:100vh;
+
     object-fit:contain;
-    border-radius:3px;
+
+    border-radius:0;
+
     user-select:none;
+
     -webkit-user-drag:none;
-    cursor:pointer
+
+    cursor:pointer;
+
+    touch-action:manipulation;
 }
 
+
+/* ==================================================
+   МОБИЛЬНЫЙ ЭКРАН
+================================================== */
+
 @media(max-width:600px){
+
     .gallery-grid{
-        grid-template-columns:repeat(4,1fr);
-        gap:5px
+
+        grid-template-columns:
+            repeat(4,1fr);
+
+        gap:5px;
     }
 
     .gallery-item{
-        border-width:2px
+
+        border-width:2px;
     }
+
 }
+
 </style>
+
 </head>
+
 
 <body>
 
+
 <header>
 
-<h1>Другие детали тоже нужны, тут собраны самые характерные.</h1>
+<h1>
+Другие детали тоже нужны, тут собраны самые характерные.
+</h1>
+
 
 <div class="top-controls">
 
-<button onclick="previousPhoto()">← Назад</button>
+<button onclick="previousPhoto()">
+← Назад
+</button>
 
-<div id="counter">Фото 1 из 80</div>
 
-<button onclick="nextPhoto()">Вперёд →</button>
+<div id="counter">
+Фото 1 из 80
+</div>
+
+
+<button onclick="nextPhoto()">
+Вперёд →
+</button>
 
 </div>
 
 </header>
 
 
+
+<!-- ==================================================
+     ОСНОВНАЯ ФОТОГРАФИЯ
+================================================== -->
+
 <div class="viewer">
 
-<div id="caption"></div>
+
+<div id="caption">
+</div>
+
 
 <div class="photo-container">
 
-<img id="photo" src="" alt="Фото 1">
+<img
+    id="photo"
+    src=""
+    alt="Фото 1"
+>
 
 </div>
 
+
+</div>
+
+
+
+<!-- ==================================================
+     БОЛЬШАЯ ГАЛЕРЕЯ
+================================================== -->
+
+<div
+    class="gallery"
+    id="gallery">
 </div>
 
 
-<div class="gallery" id="gallery"></div>
+
+<!-- ==================================================
+     НИЖНЯЯ ФИКСИРОВАННАЯ ЛЕНТА
+================================================== -->
+
+<div
+    class="thumbs"
+    id="thumbs">
+</div>
 
 
-<div class="thumbs" id="thumbs"></div>
 
+<!-- ==================================================
+     ПОЛНОЭКРАННОЕ ОКНО
+================================================== -->
 
-<!-- Полноэкранное фото -->
+<div
+    id="fullscreen"
+>
 
-<div id="fullscreen">
-
-<img id="fullscreenPhoto" src="" alt="">
+<img
+    id="fullscreenPhoto"
+    src=""
+    alt=""
+>
 
 </div>
+
 
 
 <script>
 
-/* ================================================
+
+/* ==================================================
    ОСНОВНЫЕ НАСТРОЙКИ
-================================================ */
+================================================== */
 
-const TOTAL_PHOTOS=80;
+const TOTAL_PHOTOS = 80;
 
 
-/* ================================================
+
+/* ==================================================
    ДОПОЛНИТЕЛЬНЫЕ ФОТОГРАФИИ
+==================================================
 
    Например:
-   68: ["B","H"]
 
-   Получится:
+   68: ["a","b"]
+
+   создаст:
+
    068.jpg
-   068B.jpg
-   068H.jpg
+   068a.jpg
+   068b.jpg
    069.jpg
-================================================ */
 
-const extraPhotos={
+================================================== */
+
+const extraPhotos = {
+
     68:["a","b"]
+
 };
 
 
-/* ================================================
-   ПОДПИСИ
-================================================ */
 
-const captions={
+/* ==================================================
+   ПОДПИСИ
+================================================== */
+
+const captions = {
 
     1:"Турели",
 
@@ -324,333 +505,569 @@ const captions={
     79:"Петля люка",
 
     80:"опорный каток"
+
 };
 
 
-/* ================================================
+
+/* ==================================================
    СОЗДАНИЕ СПИСКА ФАЙЛОВ
-================================================ */
+================================================== */
 
-const photoFiles=[];
+const photoFiles = [];
 
-for(let i=1;i<=TOTAL_PHOTOS;i++){
 
-    const number=String(i).padStart(3,"0");
+for(
+    let i=1;
+    i<=TOTAL_PHOTOS;
+    i++
+){
 
-    photoFiles.push(number+".jpg");
+    const number =
+        String(i).padStart(3,"0");
 
-    if(extraPhotos[i]){
 
-        extraPhotos[i].forEach(letter=>{
+    /*
+    Основная фотография
+    */
 
-            photoFiles.push(
-                number+letter+".jpg"
-            );
+    photoFiles.push(
+        number + ".jpg"
+    );
 
-        });
+
+    /*
+    Дополнительные фотографии
+    */
+
+    if(
+        extraPhotos[i]
+    ){
+
+        extraPhotos[i].forEach(
+            letter => {
+
+                photoFiles.push(
+
+                    number +
+                    letter +
+                    ".jpg"
+
+                );
+
+            }
+        );
 
     }
+
 }
 
 
-/* ================================================
+
+/* ==================================================
    ПОЛУЧЕНИЕ ПОДПИСИ
-================================================ */
+================================================== */
 
 function getCaption(photoIndex){
 
-    let currentCaption="";
+    let currentCaption = "";
 
-    const filename=photoFiles[photoIndex];
 
-    const match=filename.match(/^(\d{3})/);
+    const filename =
+        photoFiles[photoIndex];
 
-    if(!match)return"";
 
-    const baseNumber=Number(match[1]);
+    const match =
+        filename.match(/^(\d{3})/);
 
-    for(const start in captions){
 
-        const startNumber=Number(start);
+    if(!match){
 
-        if(startNumber<=baseNumber){
+        return "";
 
-            currentCaption=captions[start];
+    }
+
+
+    const baseNumber =
+        Number(match[1]);
+
+
+    for(
+        const start in captions
+    ){
+
+        const startNumber =
+            Number(start);
+
+
+        if(
+            startNumber <= baseNumber
+        ){
+
+            currentCaption =
+                captions[start];
 
         }
 
     }
 
+
     return currentCaption;
-}
-
-
-/* ================================================
-   СОЗДАНИЕ ОБЪЕКТОВ
-================================================ */
-
-const photos=[];
-
-photoFiles.forEach((file,index)=>{
-
-    photos.push({
-
-        file:"photos/"+file,
-
-        filename:file,
-
-        number:index+1,
-
-        caption:getCaption(index)
-
-    });
-
-});
-
-
-/* ================================================
-   ЭЛЕМЕНТЫ СТРАНИЦЫ
-================================================ */
-
-let current=0;
-
-const photo=document.getElementById("photo");
-
-const caption=document.getElementById("caption");
-
-const counter=document.getElementById("counter");
-
-const thumbs=document.getElementById("thumbs");
-
-const gallery=document.getElementById("gallery");
-
-const fullscreen=document.getElementById("fullscreen");
-
-const fullscreenPhoto=document.getElementById("fullscreenPhoto");
-
-
-/* ================================================
-   БОЛЬШАЯ ГАЛЕРЕЯ
-================================================ */
-
-let currentGroup=null;
-
-photos.forEach((item,index)=>{
-
-    if(
-        currentGroup===null ||
-        currentGroup.caption!==item.caption
-    ){
-
-        currentGroup={
-
-            caption:item.caption,
-
-            container:document.createElement("div"),
-
-            grid:document.createElement("div")
-
-        };
-
-        currentGroup.container.className=
-            "gallery-group";
-
-        const title=document.createElement("div");
-
-        title.className=
-            "gallery-group-title";
-
-        title.textContent=
-            item.caption;
-
-        currentGroup.grid.className=
-            "gallery-grid";
-
-        currentGroup.container.appendChild(title);
-
-        currentGroup.container.appendChild(
-            currentGroup.grid
-        );
-
-        gallery.appendChild(
-            currentGroup.container
-        );
-
-    }
-
-
-    const img=document.createElement("img");
-
-    img.src=item.file;
-
-    img.loading="lazy";
-
-    img.className="gallery-item";
-
-    img.alt=item.caption;
-
-    img.dataset.index=index;
-
-    img.onclick=function(){
-
-        showPhoto(index);
-
-    };
-
-    currentGroup.grid.appendChild(img);
-
-});
-
-
-/* ================================================
-   НИЖНЯЯ ЛЕНТА
-================================================ */
-
-photos.forEach((item,index)=>{
-
-    const img=document.createElement("img");
-
-    img.src=item.file;
-
-    img.loading="lazy";
-
-    img.onclick=function(){
-
-        showPhoto(index);
-
-        openFullscreen(item.file);
-
-    };
-
-    thumbs.appendChild(img);
-
-});
-
-
-/* ================================================
-   ПОДГОНКА ОСНОВНОЙ ФОТОГРАФИИ
-================================================ */
-
-function fitPhotoToScreen(){
-
-    const screenHeight=
-        window.innerHeight;
-
-    const headerHeight=
-        document.querySelector("header").offsetHeight;
-
-    const captionHeight=
-        caption.offsetHeight;
-
-    const availableHeight=
-        screenHeight-
-        headerHeight-
-        captionHeight-
-        55;
-
-    photo.style.maxHeight="none";
-
-    photo.style.width="100%";
-
-    photo.style.height="auto";
-
-    const naturalWidth=
-        photo.naturalWidth;
-
-    const naturalHeight=
-        photo.naturalHeight;
-
-    if(!naturalWidth||!naturalHeight)return;
-
-    const availableWidth=
-        photo.parentElement.clientWidth;
-
-    const naturalDisplayHeight=
-        availableWidth*
-        naturalHeight/
-        naturalWidth;
-
-    if(naturalDisplayHeight>availableHeight){
-
-        photo.style.width="auto";
-
-        photo.style.height=
-            availableHeight+"px";
-
-        photo.style.maxWidth="100%";
-
-        photo.style.objectFit="contain";
-
-    }else{
-
-        photo.style.width="100%";
-
-        photo.style.height="auto";
-
-    }
 
 }
 
 
-/* ================================================
-   ПОКАЗ ФОТО
-================================================ */
 
-function showPhoto(index){
+/* ==================================================
+   СОЗДАНИЕ ОБЪЕКТОВ ФОТОГРАФИЙ
+================================================== */
 
-    if(index<0){
-
-        index=photos.length-1;
-
-    }
-
-    if(index>=photos.length){
-
-        index=0;
-
-    }
-
-    current=index;
-
-    const item=photos[current];
-
-    photo.src=item.file;
-
-    photo.alt=item.caption;
-
-    caption.textContent=item.caption;
-
-    counter.textContent=
-        "Фото "+
-        (current+1)+
-        " из "+
-        photos.length;
-
-    photo.onload=function(){
-
-        fitPhotoToScreen();
-
-    };
+const photos = [];
 
 
-    /* Активная нижняя миниатюра */
+photoFiles.forEach(
+    (file,index) => {
 
-    document
-        .querySelectorAll(".thumbs img")
-        .forEach((img,i)=>{
+        photos.push({
 
-            img.classList.toggle(
-                "active",
-                i===current
-            );
+            file:
+                "photos/" + file,
+
+            filename:
+                file,
+
+            number:
+                index + 1,
+
+            caption:
+                getCaption(index)
 
         });
 
+    }
+);
 
-    /* Центрируем миниатюру */
 
-    const activeThumb=
+
+/* ==================================================
+   ЭЛЕМЕНТЫ СТРАНИЦЫ
+================================================== */
+
+let current = 0;
+
+
+const photo =
+    document.getElementById("photo");
+
+
+const caption =
+    document.getElementById("caption");
+
+
+const counter =
+    document.getElementById("counter");
+
+
+const thumbs =
+    document.getElementById("thumbs");
+
+
+const gallery =
+    document.getElementById("gallery");
+
+
+const fullscreen =
+    document.getElementById("fullscreen");
+
+
+const fullscreenPhoto =
+    document.getElementById("fullscreenPhoto");
+
+
+
+/* ==================================================
+   БОЛЬШАЯ ГАЛЕРЕЯ
+================================================== */
+
+let currentGroup = null;
+
+
+photos.forEach(
+    (item,index) => {
+
+
+        /*
+        Если описание изменилось,
+        создаём новую группу.
+        */
+
+        if(
+            currentGroup === null ||
+            currentGroup.caption !== item.caption
+        ){
+
+            currentGroup = {
+
+                caption:
+                    item.caption,
+
+                container:
+                    document.createElement("div"),
+
+                grid:
+                    document.createElement("div")
+
+            };
+
+
+            currentGroup.container.className =
+                "gallery-group";
+
+
+            const title =
+                document.createElement("div");
+
+
+            title.className =
+                "gallery-group-title";
+
+
+            title.textContent =
+                item.caption;
+
+
+            currentGroup.grid.className =
+                "gallery-grid";
+
+
+            currentGroup.container.appendChild(
+                title
+            );
+
+
+            currentGroup.container.appendChild(
+                currentGroup.grid
+            );
+
+
+            gallery.appendChild(
+                currentGroup.container
+            );
+
+        }
+
+
+        const img =
+            document.createElement("img");
+
+
+        img.src =
+            item.file;
+
+
+        img.loading =
+            "lazy";
+
+
+        img.className =
+            "gallery-item";
+
+
+        img.alt =
+            item.caption;
+
+
+        img.dataset.index =
+            index;
+
+
+        /*
+        Нажатие на большую галерею
+        просто переключает фото.
+        */
+
+        img.onclick =
+            function(){
+
+                showPhoto(index);
+
+            };
+
+
+        currentGroup.grid.appendChild(
+            img
+        );
+
+    }
+);
+
+
+
+/* ==================================================
+   НИЖНЯЯ ЛЕНТА
+================================================== */
+
+photos.forEach(
+    (item,index) => {
+
+
+        const img =
+            document.createElement("img");
+
+
+        img.src =
+            item.file;
+
+
+        img.loading =
+            "lazy";
+
+
+        /*
+        Нажатие на нижнюю миниатюру:
+
+        1. переключает основное фото;
+        2. открывает фото на весь экран.
+        */
+
+        img.onclick =
+            function(){
+
+                showPhoto(index);
+
+                openFullscreen(
+                    item.file
+                );
+
+            };
+
+
+        thumbs.appendChild(
+            img
+        );
+
+    }
+);
+
+
+
+/* ==================================================
+   ПОДГОНКА ОСНОВНОЙ ФОТОГРАФИИ
+================================================== */
+
+function fitPhotoToScreen(){
+
+
+    const screenHeight =
+        window.innerHeight;
+
+
+    const headerHeight =
+        document.querySelector("header")
+        .offsetHeight;
+
+
+    const captionHeight =
+        caption.offsetHeight;
+
+
+    const availableHeight =
+        screenHeight -
+        headerHeight -
+        captionHeight -
+        55;
+
+
+    photo.style.maxHeight =
+        "none";
+
+
+    photo.style.width =
+        "100%";
+
+
+    photo.style.height =
+        "auto";
+
+
+    const naturalWidth =
+        photo.naturalWidth;
+
+
+    const naturalHeight =
+        photo.naturalHeight;
+
+
+    if(
+        !naturalWidth ||
+        !naturalHeight
+    ){
+
+        return;
+
+    }
+
+
+    const availableWidth =
+        photo.parentElement
+        .clientWidth;
+
+
+    const naturalDisplayHeight =
+        availableWidth *
+        naturalHeight /
+        naturalWidth;
+
+
+    /*
+    Если фотография слишком высокая,
+    уменьшаем её по высоте.
+    */
+
+    if(
+        naturalDisplayHeight >
+        availableHeight
+    ){
+
+        photo.style.width =
+            "auto";
+
+
+        photo.style.height =
+            availableHeight + "px";
+
+
+        photo.style.maxWidth =
+            "100%";
+
+
+        photo.style.objectFit =
+            "contain";
+
+    }
+
+    else{
+
+        /*
+        Обычная фотография —
+        полная ширина.
+        */
+
+        photo.style.width =
+            "100%";
+
+
+        photo.style.height =
+            "auto";
+
+    }
+
+}
+
+
+
+/* ==================================================
+   ПОКАЗ ФОТОГРАФИИ
+================================================== */
+
+function showPhoto(index){
+
+
+    if(index < 0){
+
+        index =
+            photos.length - 1;
+
+    }
+
+
+    if(
+        index >= photos.length
+    ){
+
+        index = 0;
+
+    }
+
+
+    current = index;
+
+
+    const item =
+        photos[current];
+
+
+    /*
+    Основная фотография
+    */
+
+    photo.src =
+        item.file;
+
+
+    photo.alt =
+        item.caption;
+
+
+    /*
+    Описание
+    */
+
+    caption.textContent =
+        item.caption;
+
+
+    /*
+    Счётчик
+    */
+
+    counter.textContent =
+        "Фото " +
+        (current + 1) +
+        " из " +
+        photos.length;
+
+
+    /*
+    Размер основной фотографии
+    */
+
+    photo.onload =
+        function(){
+
+            fitPhotoToScreen();
+
+        };
+
+
+    /*
+    Активная миниатюра нижней ленты
+    */
+
+    document
+        .querySelectorAll(".thumbs img")
+        .forEach(
+            (img,i) => {
+
+                img.classList.toggle(
+
+                    "active",
+
+                    i === current
+
+                );
+
+            }
+        );
+
+
+    /*
+    Центрируем активную миниатюру
+    */
+
+    const activeThumb =
         thumbs.children[current];
+
 
     if(activeThumb){
 
@@ -667,122 +1084,196 @@ function showPhoto(index){
     }
 
 
-    /* Активная фотография большой галереи */
+    /*
+    Активная фотография большой галереи
+    */
 
     document
         .querySelectorAll(".gallery-item")
-        .forEach((img,i)=>{
+        .forEach(
+            (img,i) => {
 
-            img.classList.toggle(
-                "active",
-                i===current
-            );
+                img.classList.toggle(
 
-        });
+                    "active",
+
+                    i === current
+
+                );
+
+            }
+        );
 
 }
 
 
-/* ================================================
-   ПОЛНОЭКРАННЫЙ ПРОСМОТР
-================================================ */
+
+/* ==================================================
+   ОТКРЫТИЕ ПОЛНОЭКРАННОГО ФОТО
+================================================== */
 
 function openFullscreen(file){
 
-    fullscreenPhoto.src=file;
+    fullscreenPhoto.src =
+        file;
 
-    fullscreen.style.display="flex";
 
-    document.body.style.overflow="hidden";
+    fullscreenPhoto.alt =
+        "Полноэкранная фотография";
+
+
+    fullscreen.classList.add(
+        "show"
+    );
+
+
+    /*
+    Запрещаем прокрутку страницы,
+    пока открыта фотография.
+    */
+
+    document.body.style.overflow =
+        "hidden";
 
 }
 
 
-/* ================================================
-   ЗАКРЫТИЕ
-================================================ */
+
+/* ==================================================
+   ЗАКРЫТИЕ ПОЛНОЭКРАННОГО ФОТО
+================================================== */
 
 function closeFullscreen(){
 
-    fullscreen.style.display="none";
 
-    fullscreenPhoto.src="";
+    fullscreen.classList.remove(
+        "show"
+    );
 
-    document.body.style.overflow="";
+
+    fullscreenPhoto.src =
+        "";
+
+
+    document.body.style.overflow =
+        "";
 
 }
 
 
-/* Нажатие на фото закрывает окно */
+
+/* ==================================================
+   НАЖАТИЕ НА ПОЛНОЭКРАННУЮ ФОТОГРАФИЮ
+==================================================
+
+   Повторное нажатие закрывает её.
+================================================== */
 
 fullscreenPhoto.addEventListener(
+
     "click",
+
     function(){
 
         closeFullscreen();
 
     }
+
 );
 
 
-/* Нажатие на чёрный фон тоже закрывает */
+
+/* ==================================================
+   НАЖАТИЕ НА ЧЁРНЫЙ ФОН
+==================================================
+
+   Нажатие вне фотографии тоже закрывает.
+================================================== */
 
 fullscreen.addEventListener(
+
     "click",
+
     function(event){
 
-        if(event.target===fullscreen){
+        if(
+            event.target === fullscreen
+        ){
 
             closeFullscreen();
 
         }
 
     }
+
 );
 
 
-/* ================================================
+
+/* ==================================================
    RESIZE
-================================================ */
+================================================== */
 
 window.addEventListener(
+
     "resize",
+
     function(){
 
         fitPhotoToScreen();
 
     }
+
 );
 
 
-/* ================================================
-   НАВИГАЦИЯ
-================================================ */
+
+/* ==================================================
+   СЛЕДУЮЩАЯ ФОТОГРАФИЯ
+================================================== */
 
 function nextPhoto(){
 
-    showPhoto(current+1);
+    showPhoto(
+        current + 1
+    );
 
 }
+
+
+
+/* ==================================================
+   ПРЕДЫДУЩАЯ ФОТОГРАФИЯ
+================================================== */
 
 function previousPhoto(){
 
-    showPhoto(current-1);
+    showPhoto(
+        current - 1
+    );
 
 }
 
 
-/* ================================================
+
+/* ==================================================
    КЛАВИАТУРА
-================================================ */
+================================================== */
 
 document.addEventListener(
+
     "keydown",
+
     function(event){
 
+
+        /*
+        Escape закрывает полноэкранное фото.
+        */
+
         if(
-            event.key==="Escape" &&
-            fullscreen.style.display==="flex"
+            event.key === "Escape" &&
+            fullscreen.classList.contains("show")
         ){
 
             closeFullscreen();
@@ -791,72 +1282,106 @@ document.addEventListener(
 
         }
 
-        if(event.key==="ArrowRight"){
+
+        if(
+            event.key === "ArrowRight"
+        ){
 
             nextPhoto();
 
         }
 
-        if(event.key==="ArrowLeft"){
+
+        if(
+            event.key === "ArrowLeft"
+        ){
 
             previousPhoto();
 
         }
 
     }
+
 );
 
 
-/* ================================================
-   СВАЙП
-================================================ */
 
-let startX=0;
+/* ==================================================
+   ЛИСТАНИЕ ПАЛЬЦЕМ
+================================================== */
 
-let startY=0;
+let startX = 0;
+
+let startY = 0;
+
 
 photo.addEventListener(
+
     "touchstart",
+
     function(event){
 
-        startX=
-            event.changedTouches[0].screenX;
+        startX =
+            event.changedTouches[0]
+            .screenX;
 
-        startY=
-            event.changedTouches[0].screenY;
+
+        startY =
+            event.changedTouches[0]
+            .screenY;
 
     },
-    {passive:true}
+
+    {
+        passive:true
+    }
+
 );
 
 
 photo.addEventListener(
+
     "touchend",
+
     function(event){
 
-        const endX=
-            event.changedTouches[0].screenX;
 
-        const endY=
-            event.changedTouches[0].screenY;
+        const endX =
+            event.changedTouches[0]
+            .screenX;
 
-        const differenceX=
-            endX-startX;
 
-        const differenceY=
-            endY-startY;
+        const endY =
+            event.changedTouches[0]
+            .screenY;
+
+
+        const differenceX =
+            endX - startX;
+
+
+        const differenceY =
+            endY - startY;
+
 
         if(
-            Math.abs(differenceX)>60 &&
-            Math.abs(differenceX)>
+
+            Math.abs(differenceX) > 60 &&
+
+            Math.abs(differenceX) >
             Math.abs(differenceY)
+
         ){
 
-            if(differenceX<0){
+            if(
+                differenceX < 0
+            ){
 
                 nextPhoto();
 
-            }else{
+            }
+
+            else{
 
                 previousPhoto();
 
@@ -865,13 +1390,18 @@ photo.addEventListener(
         }
 
     },
-    {passive:true}
+
+    {
+        passive:true
+    }
+
 );
 
 
-/* ================================================
+
+/* ==================================================
    ЗАПУСК
-================================================ */
+================================================== */
 
 showPhoto(0);
 
