@@ -58,6 +58,11 @@ h1 {
     transform: scale(.96);
 }
 
+
+/* ==================================================
+   ОСНОВНАЯ ФОТОГРАФИЯ
+================================================== */
+
 .viewer {
 
     min-height: calc(100vh - 80px);
@@ -110,6 +115,108 @@ h1 {
     -webkit-user-drag: none;
 }
 
+
+/* ==================================================
+   БОЛЬШАЯ ГАЛЕРЕЯ
+================================================== */
+
+.gallery {
+
+    width: 100%;
+
+    padding:
+        20px
+        10px
+        100px;
+}
+
+
+/* Группа фотографий одного типа */
+
+.gallery-group {
+
+    margin-bottom: 30px;
+}
+
+
+/* Название группы */
+
+.gallery-group-title {
+
+    font-size: 18px;
+
+    font-weight: bold;
+
+    text-align: center;
+
+    margin-bottom: 12px;
+
+    color: #eee;
+}
+
+
+/* Четыре фотографии в ряд */
+
+.gallery-grid {
+
+    display: grid;
+
+    grid-template-columns:
+        repeat(4, 1fr);
+
+    gap: 8px;
+}
+
+
+/* Фотография в большой галерее */
+
+.gallery-item {
+
+    width: 100%;
+
+    aspect-ratio: 1 / 1;
+
+    object-fit: cover;
+
+    border-radius: 5px;
+
+    cursor: pointer;
+
+    opacity: .75;
+
+    border: 3px solid transparent;
+
+    transition:
+        opacity .15s,
+        border-color .15s,
+        transform .15s;
+}
+
+
+/* Наведение */
+
+.gallery-item:hover {
+
+    opacity: 1;
+
+}
+
+
+/* Выбранная фотография */
+
+.gallery-item.active {
+
+    opacity: 1;
+
+    border: 3px solid white;
+
+}
+
+
+/* ==================================================
+   ФИКСИРОВАННАЯ НИЖНЯЯ ЛЕНТА
+================================================== */
+
 .thumbs {
 
     position: fixed;
@@ -155,6 +262,30 @@ h1 {
     outline: 2px solid white;
 }
 
+
+/* ==================================================
+   МОБИЛЬНЫЙ ЭКРАН
+================================================== */
+
+@media (max-width: 600px) {
+
+    .gallery-grid {
+
+        grid-template-columns:
+            repeat(4, 1fr);
+
+        gap: 5px;
+
+    }
+
+    .gallery-item {
+
+        border-width: 2px;
+
+    }
+
+}
+
 </style>
 
 </head>
@@ -191,6 +322,10 @@ h1 {
 
 
 
+<!-- ==================================================
+     ОСНОВНАЯ ФОТОГРАФИЯ
+================================================== -->
+
 <div class="viewer">
 
 
@@ -208,6 +343,21 @@ h1 {
 </div>
 
 
+
+<!-- ==================================================
+     БОЛЬШАЯ ГАЛЕРЕЯ
+================================================== -->
+
+<div
+    class="gallery"
+    id="gallery">
+</div>
+
+
+
+<!-- ==================================================
+     ФИКСИРОВАННАЯ НИЖНЯЯ ЛЕНТА
+================================================== -->
 
 <div
     class="thumbs"
@@ -350,7 +500,7 @@ function getCaption(photoNumber) {
 
 /*
 ====================================================
-ТЕКУЩАЯ ФОТОГРАФИЯ
+ЭЛЕМЕНТЫ СТРАНИЦЫ
 ====================================================
 */
 
@@ -371,6 +521,179 @@ const counter =
 
 const thumbs =
     document.getElementById("thumbs");
+
+
+const gallery =
+    document.getElementById("gallery");
+
+
+/*
+====================================================
+СОЗДАНИЕ БОЛЬШОЙ ГАЛЕРЕИ
+====================================================
+
+Каждая новая подпись начинает новую группу.
+====================================================
+*/
+
+let currentGroup = null;
+
+
+photos.forEach(
+    (item, index) => {
+
+
+        /*
+        Если описание изменилось,
+        создаём новую группу
+        */
+
+        if (
+            currentGroup === null ||
+            currentGroup.caption !== item.caption
+        ) {
+
+
+            currentGroup = {
+
+                caption:
+                    item.caption,
+
+                container:
+                    document.createElement("div"),
+
+                grid:
+                    document.createElement("div")
+
+            };
+
+
+            currentGroup.container
+                .className =
+                "gallery-group";
+
+
+            const title =
+                document.createElement("div");
+
+
+            title.className =
+                "gallery-group-title";
+
+
+            title.textContent =
+                item.caption;
+
+
+            currentGroup.grid
+                .className =
+                "gallery-grid";
+
+
+            currentGroup.container
+                .appendChild(title);
+
+
+            currentGroup.container
+                .appendChild(
+                    currentGroup.grid
+                );
+
+
+            gallery.appendChild(
+                currentGroup.container
+            );
+
+        }
+
+
+
+        /*
+        Создаём фотографию
+        */
+
+        const img =
+            document.createElement("img");
+
+
+        img.src =
+            item.file;
+
+
+        img.loading =
+            "lazy";
+
+
+        img.className =
+            "gallery-item";
+
+
+        img.alt =
+            item.caption;
+
+
+        /*
+        При нажатии переключаем
+        основную фотографию
+        */
+
+        img.onclick =
+            function() {
+
+                showPhoto(index);
+
+            };
+
+
+        /*
+        Запоминаем номер фотографии
+        */
+
+        img.dataset.index =
+            index;
+
+
+        currentGroup.grid
+            .appendChild(img);
+
+    }
+);
+
+
+/*
+====================================================
+СОЗДАНИЕ НИЖНИХ МИНИАТЮР
+====================================================
+*/
+
+photos.forEach(
+    (item, index) => {
+
+
+        const img =
+            document.createElement("img");
+
+
+        img.src =
+            item.file;
+
+
+        img.loading =
+            "lazy";
+
+
+        img.onclick =
+            function() {
+
+                showPhoto(index);
+
+            };
+
+
+        thumbs.appendChild(img);
+
+    }
+);
 
 
 /*
@@ -404,6 +727,10 @@ function showPhoto(index) {
         photos[current];
 
 
+    /*
+    Основная фотография
+    */
+
     photo.src =
         item.file;
 
@@ -412,9 +739,17 @@ function showPhoto(index) {
         item.caption;
 
 
+    /*
+    Описание
+    */
+
     caption.textContent =
         item.caption;
 
+
+    /*
+    Счётчик
+    */
 
     counter.textContent =
         "Фото " +
@@ -423,6 +758,12 @@ function showPhoto(index) {
         photos.length;
 
 
+
+    /*
+    ==================================================
+    АКТИВНАЯ МИНИАТЮРА В НИЖНЕЙ ЛЕНТЕ
+    ==================================================
+    */
 
     document
         .querySelectorAll(".thumbs img")
@@ -439,19 +780,20 @@ function showPhoto(index) {
         });
 
 
+
     /*
     ==================================================
-    АВТОМАТИЧЕСКИ ЦЕНТРИРУЕМ ТЕКУЩУЮ МИНИАТЮРУ
+    ПРОКРУТКА НИЖНЕЙ ЛЕНТЫ
     ==================================================
     */
 
-    const active =
+    const activeThumb =
         thumbs.children[current];
 
 
-    if (active) {
+    if (activeThumb) {
 
-        active.scrollIntoView({
+        activeThumb.scrollIntoView({
 
             behavior: "smooth",
 
@@ -462,6 +804,29 @@ function showPhoto(index) {
         });
 
     }
+
+
+
+    /*
+    ==================================================
+    АКТИВНАЯ ФОТОГРАФИЯ
+    В БОЛЬШОЙ ГАЛЕРЕЕ
+    ==================================================
+    */
+
+    document
+        .querySelectorAll(".gallery-item")
+        .forEach((img, i) => {
+
+            img.classList.toggle(
+
+                "active",
+
+                i === current
+
+            );
+
+        });
 
 }
 
@@ -494,43 +859,6 @@ function previousPhoto() {
     );
 
 }
-
-
-/*
-====================================================
-МИНИАТЮРЫ
-====================================================
-*/
-
-photos.forEach(
-    (item, index) => {
-
-
-        const img =
-            document.createElement("img");
-
-
-        img.src =
-            item.file;
-
-
-        img.loading =
-            "lazy";
-
-
-        img.onclick =
-            function() {
-
-                showPhoto(index);
-
-            };
-
-
-        thumbs.appendChild(img);
-
-
-    }
-);
 
 
 /*
