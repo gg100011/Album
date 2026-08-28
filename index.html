@@ -60,7 +60,7 @@ h1 {
 
 
 /* ==================================================
-   ОСНОВНАЯ ФОТОГРАФИЯ
+   ОСНОВНАЯ ОБЛАСТЬ
 ================================================== */
 
 .viewer {
@@ -78,6 +78,11 @@ h1 {
 
     justify-content: flex-start;
 }
+
+
+/* ==================================================
+   ОПИСАНИЕ
+================================================== */
 
 #caption {
 
@@ -98,6 +103,27 @@ h1 {
     color: #eee;
 }
 
+
+/* ==================================================
+   КОНТЕЙНЕР ОСНОВНОЙ ФОТОГРАФИИ
+================================================== */
+
+.photo-container {
+
+    width: 100%;
+
+    display: flex;
+
+    justify-content: center;
+
+    align-items: center;
+}
+
+
+/* ==================================================
+   ОСНОВНАЯ ФОТОГРАФИЯ
+================================================== */
+
 #photo {
 
     width: 100%;
@@ -111,6 +137,14 @@ h1 {
     user-select: none;
 
     -webkit-user-drag: none;
+
+    display: block;
+
+    object-fit: contain;
+
+    transition:
+        width .2s ease,
+        height .2s ease;
 }
 
 
@@ -128,16 +162,10 @@ h1 {
         100px;
 }
 
-
-/* Группа фотографий одного типа */
-
 .gallery-group {
 
     margin-bottom: 30px;
 }
-
-
-/* Название группы */
 
 .gallery-group-title {
 
@@ -152,9 +180,6 @@ h1 {
     color: #eee;
 }
 
-
-/* Четыре фотографии в ряд */
-
 .gallery-grid {
 
     display: grid;
@@ -164,9 +189,6 @@ h1 {
 
     gap: 8px;
 }
-
-
-/* Фотография в большой галерее */
 
 .gallery-item {
 
@@ -190,29 +212,21 @@ h1 {
         transform .15s;
 }
 
-
-/* Наведение */
-
 .gallery-item:hover {
 
     opacity: 1;
-
 }
-
-
-/* Выбранная фотография */
 
 .gallery-item.active {
 
     opacity: 1;
 
     border: 3px solid white;
-
 }
 
 
 /* ==================================================
-   ФИКСИРОВАННАЯ НИЖНЯЯ ЛЕНТА
+   НИЖНЯЯ ФИКСИРОВАННАЯ ЛЕНТА
 ================================================== */
 
 .thumbs {
@@ -273,13 +287,11 @@ h1 {
             repeat(4, 1fr);
 
         gap: 5px;
-
     }
 
     .gallery-item {
 
         border-width: 2px;
-
     }
 
 }
@@ -315,7 +327,6 @@ h1 {
 
 </div>
 
-
 </header>
 
 
@@ -331,11 +342,15 @@ h1 {
 </div>
 
 
+<div class="photo-container">
+
 <img
     id="photo"
-    src="photos/001.jpg"
+    src=""
     alt="Фото 1"
 >
+
+</div>
 
 
 </div>
@@ -354,7 +369,7 @@ h1 {
 
 
 <!-- ==================================================
-     ФИКСИРОВАННАЯ НИЖНЯЯ ЛЕНТА
+     НИЖНЯЯ ФИКСИРОВАННАЯ ЛЕНТА
 ================================================== -->
 
 <div
@@ -369,9 +384,109 @@ h1 {
 
 /*
 ====================================================
-НАСТРОЙКА ПОДПИСЕЙ
+ОСНОВНЫЕ НАСТРОЙКИ
 ====================================================
 */
+
+
+/*
+Количество обычных фотографий.
+
+001.jpg
+002.jpg
+003.jpg
+...
+080.jpg
+*/
+
+const TOTAL_PHOTOS = 80;
+
+
+
+/*
+====================================================
+ДОПОЛНИТЕЛЬНЫЕ ФОТОГРАФИИ
+====================================================
+
+Здесь указываются ТОЛЬКО дополнительные фотографии
+с буквами.
+
+Например:
+
+25: ["A", "B"]
+
+создаст:
+
+025.jpg
+025A.jpg
+025B.jpg
+026.jpg
+
+
+Другой пример:
+
+57: ["A", "B", "C"]
+
+создаст:
+
+057.jpg
+057A.jpg
+057B.jpg
+057C.jpg
+058.jpg
+
+
+Если дополнительных фотографий между 30 и 31 нет,
+ничего писать не нужно.
+====================================================
+*/
+
+
+const extraPhotos = {
+    68: ["a", "b"]
+
+    /*
+    25: ["A", "B", "C"],
+
+    40: ["A"],
+
+    57: ["A", "B"],
+
+    70: ["A", "B", "C"]
+    */
+
+};
+
+
+/*
+====================================================
+НАСТРОЙКА ПОДПИСЕЙ
+====================================================
+
+Описание начинает действовать с указанного
+обычного номера фотографии и продолжается
+до следующего описания.
+
+Например:
+
+024 = Ведущее колесо
+
+Значит:
+
+024.jpg
+025.jpg
+025A.jpg
+025B.jpg
+026.jpg
+
+получат описание:
+
+"Ведущее колесо"
+
+А с 027 начинается следующая группа.
+====================================================
+*/
+
 
 const captions = {
 
@@ -424,64 +539,135 @@ const captions = {
 
 /*
 ====================================================
-КОЛИЧЕСТВО ФОТОГРАФИЙ
-====================================================
-*/
-
-const TOTAL_PHOTOS = 80;
-
-
-/*
-====================================================
 СОЗДАНИЕ СПИСКА ФОТОГРАФИЙ
 ====================================================
+
+Здесь НИЧЕГО вручную писать не нужно.
+
+Код сам создаёт:
+
+001.jpg
+002.jpg
+...
+080.jpg
+
+и автоматически вставляет дополнительные:
+
+025A.jpg
+025B.jpg
+и т.д.
+====================================================
 */
 
-const photos = [];
+
+const photoFiles = [];
 
 
-for (let i = 1; i <= TOTAL_PHOTOS; i++) {
+for (
+    let i = 1;
+    i <= TOTAL_PHOTOS;
+    i++
+) {
+
+
+    /*
+    Обычная фотография
+    */
 
     const number =
         String(i).padStart(3, "0");
 
 
-    photos.push({
+    photoFiles.push(
+        number + ".jpg"
+    );
 
-        file:
-            "photos/" +
-            number +
-            ".jpg",
 
-        number:
-            i,
+    /*
+    Дополнительные фотографии
+    */
 
-        caption:
-            getCaption(i)
+    if (
+        extraPhotos[i]
+    ) {
 
-    });
+
+        extraPhotos[i].forEach(
+            letter => {
+
+                photoFiles.push(
+
+                    number +
+                    letter +
+                    ".jpg"
+
+                );
+
+            }
+        );
+
+    }
 
 }
 
 
 /*
 ====================================================
-ФУНКЦИЯ ПОЛУЧЕНИЯ ПОДПИСИ
+ПОЛУЧЕНИЕ ОПИСАНИЯ
 ====================================================
 */
 
-function getCaption(photoNumber) {
+
+function getCaption(photoIndex) {
 
     let currentCaption = "";
 
 
-    for (const start in captions) {
+    /*
+    Находим обычный номер фотографии,
+    которому соответствует текущий файл.
+
+    Например:
+
+    025.jpg  → 25
+    025A.jpg → 25
+    025B.jpg → 25
+    */
+
+    const filename =
+        photoFiles[photoIndex];
+
+
+    const match =
+        filename.match(/^(\d{3})/);
+
+
+    if (!match) {
+
+        return "";
+
+    }
+
+
+    const baseNumber =
+        Number(match[1]);
+
+
+    /*
+    Ищем ближайшее предыдущее описание.
+    */
+
+    for (
+        const start in captions
+    ) {
 
         const startNumber =
             Number(start);
 
 
-        if (startNumber <= photoNumber) {
+        if (
+            startNumber <= baseNumber
+        ) {
 
             currentCaption =
                 captions[start];
@@ -498,9 +684,44 @@ function getCaption(photoNumber) {
 
 /*
 ====================================================
+СОЗДАНИЕ ОБЪЕКТОВ ФОТОГРАФИЙ
+====================================================
+*/
+
+
+const photos = [];
+
+
+photoFiles.forEach(
+    (file, index) => {
+
+
+        photos.push({
+
+            file:
+                "photos/" + file,
+
+            filename:
+                file,
+
+            number:
+                index + 1,
+
+            caption:
+                getCaption(index)
+
+        });
+
+    }
+);
+
+
+/*
+====================================================
 ЭЛЕМЕНТЫ СТРАНИЦЫ
 ====================================================
 */
+
 
 let current = 0;
 
@@ -529,10 +750,8 @@ const gallery =
 ====================================================
 СОЗДАНИЕ БОЛЬШОЙ ГАЛЕРЕИ
 ====================================================
-
-Каждая новая подпись начинает новую группу.
-====================================================
 */
+
 
 let currentGroup = null;
 
@@ -543,7 +762,7 @@ photos.forEach(
 
         /*
         Если описание изменилось,
-        создаём новую группу
+        начинаем новую строку/группу.
         */
 
         if (
@@ -605,7 +824,6 @@ photos.forEach(
         }
 
 
-
         /*
         Создаём фотографию
         */
@@ -630,10 +848,9 @@ photos.forEach(
             item.caption;
 
 
-        /*
-        При нажатии переключаем
-        основную фотографию
-        */
+        img.dataset.index =
+            index;
+
 
         img.onclick =
             function() {
@@ -641,14 +858,6 @@ photos.forEach(
                 showPhoto(index);
 
             };
-
-
-        /*
-        Запоминаем номер фотографии
-        */
-
-        img.dataset.index =
-            index;
 
 
         currentGroup.grid
@@ -660,9 +869,10 @@ photos.forEach(
 
 /*
 ====================================================
-СОЗДАНИЕ НИЖНИХ МИНИАТЮР
+СОЗДАНИЕ НИЖНЕЙ ЛЕНТЫ
 ====================================================
 */
+
 
 photos.forEach(
     (item, index) => {
@@ -696,12 +906,161 @@ photos.forEach(
 
 /*
 ====================================================
+ПОДГОНКА ОСНОВНОЙ ФОТОГРАФИИ
+====================================================
+
+Обычная фотография:
+→ 100% ширины.
+
+Очень высокая фотография:
+→ уменьшается так, чтобы полностью
+   помещаться в доступной области экрана.
+====================================================
+*/
+
+
+function fitPhotoToScreen() {
+
+
+    const screenHeight =
+        window.innerHeight;
+
+
+    const headerHeight =
+        document.querySelector("header")
+        .offsetHeight;
+
+
+    const captionHeight =
+        caption.offsetHeight;
+
+
+    /*
+    Доступная высота.
+
+    Оставляем небольшой запас,
+    чтобы фотография не упиралась
+    в элементы интерфейса.
+    */
+
+    const availableHeight =
+        screenHeight -
+        headerHeight -
+        captionHeight -
+        55;
+
+
+    /*
+    Сбрасываем предыдущие размеры.
+    */
+
+    photo.style.maxHeight =
+        "none";
+
+
+    photo.style.width =
+        "100%";
+
+
+    photo.style.height =
+        "auto";
+
+
+    const naturalWidth =
+        photo.naturalWidth;
+
+
+    const naturalHeight =
+        photo.naturalHeight;
+
+
+    if (
+        !naturalWidth ||
+        !naturalHeight
+    ) {
+
+        return;
+
+    }
+
+
+    const availableWidth =
+        photo.parentElement
+            .clientWidth;
+
+
+    /*
+    Рассчитываем высоту,
+    которую фотография имела бы
+    при ширине 100%.
+    */
+
+    const naturalDisplayHeight =
+        availableWidth *
+        naturalHeight /
+        naturalWidth;
+
+
+    /*
+    Если фотография слишком высокая,
+    уменьшаем её по высоте.
+    */
+
+    if (
+        naturalDisplayHeight >
+        availableHeight
+    ) {
+
+        photo.style.width =
+            "auto";
+
+
+        photo.style.height =
+            availableHeight + "px";
+
+
+        photo.style.maxWidth =
+            "100%";
+
+
+        photo.style.objectFit =
+            "contain";
+
+    }
+
+    else {
+
+        /*
+        Обычная фотография —
+        снова полная ширина.
+        */
+
+        photo.style.width =
+            "100%";
+
+
+        photo.style.height =
+            "auto";
+
+    }
+
+}
+
+
+/*
+====================================================
 ПОКАЗАТЬ ФОТОГРАФИЮ
 ====================================================
 */
 
+
 function showPhoto(index) {
 
+
+    /*
+    Переход с первой фотографии
+    на последнюю.
+    */
 
     if (index < 0) {
 
@@ -711,7 +1070,14 @@ function showPhoto(index) {
     }
 
 
-    if (index >= photos.length) {
+    /*
+    Переход с последней
+    на первую.
+    */
+
+    if (
+        index >= photos.length
+    ) {
 
         index = 0;
 
@@ -756,27 +1122,40 @@ function showPhoto(index) {
         photos.length;
 
 
+    /*
+    После загрузки фотографии
+    рассчитываем её размер.
+    */
+
+    photo.onload =
+        function() {
+
+            fitPhotoToScreen();
+
+        };
+
 
     /*
     ==================================================
-    АКТИВНАЯ МИНИАТЮРА В НИЖНЕЙ ЛЕНТЕ
+    АКТИВНАЯ МИНИАТЮРА
     ==================================================
     */
 
     document
         .querySelectorAll(".thumbs img")
-        .forEach((img, i) => {
+        .forEach(
+            (img, i) => {
 
-            img.classList.toggle(
+                img.classList.toggle(
 
-                "active",
+                    "active",
 
-                i === current
+                    i === current
 
-            );
+                );
 
-        });
-
+            }
+        );
 
 
     /*
@@ -804,7 +1183,6 @@ function showPhoto(index) {
     }
 
 
-
     /*
     ==================================================
     АКТИВНАЯ ФОТОГРАФИЯ
@@ -814,19 +1192,41 @@ function showPhoto(index) {
 
     document
         .querySelectorAll(".gallery-item")
-        .forEach((img, i) => {
+        .forEach(
+            (img, i) => {
 
-            img.classList.toggle(
+                img.classList.toggle(
 
-                "active",
+                    "active",
 
-                i === current
+                    i === current
 
-            );
+                );
 
-        });
+            }
+        );
 
 }
+
+
+/*
+====================================================
+ИЗМЕНЕНИЕ РАЗМЕРА ЭКРАНА
+====================================================
+*/
+
+
+window.addEventListener(
+
+    "resize",
+
+    function() {
+
+        fitPhotoToScreen();
+
+    }
+
+);
 
 
 /*
@@ -834,6 +1234,7 @@ function showPhoto(index) {
 СЛЕДУЮЩАЯ ФОТОГРАФИЯ
 ====================================================
 */
+
 
 function nextPhoto() {
 
@@ -850,6 +1251,7 @@ function nextPhoto() {
 ====================================================
 */
 
+
 function previousPhoto() {
 
     showPhoto(
@@ -865,8 +1267,11 @@ function previousPhoto() {
 ====================================================
 */
 
+
 document.addEventListener(
+
     "keydown",
+
     function(event) {
 
 
@@ -889,8 +1294,8 @@ document.addEventListener(
 
         }
 
-
     }
+
 );
 
 
@@ -899,6 +1304,7 @@ document.addEventListener(
 ЛИСТАНИЕ ПАЛЬЦЕМ
 ====================================================
 */
+
 
 let startX = 0;
 
@@ -920,7 +1326,6 @@ photo.addEventListener(
         startY =
             event.changedTouches[0]
             .screenY;
-
 
     },
 
@@ -980,9 +1385,7 @@ photo.addEventListener(
 
             }
 
-
         }
-
 
     },
 
@@ -998,6 +1401,7 @@ photo.addEventListener(
 ЗАПУСК
 ====================================================
 */
+
 
 showPhoto(0);
 
