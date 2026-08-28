@@ -1,0 +1,768 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Другие детали тоже нужны, тут собраны самые характерные.</title>
+
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#111;color:white;font-family:Arial,sans-serif}
+
+header{
+text-align:center;padding:15px;background:#181818;
+position:sticky;top:0;z-index:10
+}
+
+h1{margin:0 0 5px;font-size:21px}
+#counter{color:#aaa;font-size:14px}
+
+.top-controls{
+display:flex;align-items:center;justify-content:center;gap:12px
+}
+
+.top-controls button{
+background:#303030;color:white;border:1px solid #00ff44;
+border-radius:8px;padding:8px 12px;font-size:14px
+}
+
+.viewer{
+padding:15px 10px 20px;display:flex;
+flex-direction:column;align-items:center;justify-content:flex-start
+}
+
+#caption{
+width:100%;max-width:900px;text-align:center;
+font-size:21.6px;line-height:1.5;margin-bottom:15px;
+padding:0 10px;color:#eee
+}
+
+.photo-container{
+width:100%;display:flex;justify-content:center;align-items:center;
+overflow:hidden
+}
+
+#photo{
+width:100%;height:auto;max-width:100%;border-radius:5px;
+user-select:none;-webkit-user-drag:none;display:block;
+object-fit:contain;cursor:pointer;will-change:transform
+}
+
+.gallery{width:100%;padding:20px 10px 100px}
+.gallery-group{margin-bottom:30px}
+
+.gallery-group-title{
+font-size:21.6px;font-weight:bold;text-align:center;
+margin-bottom:12px;color:#eee
+}
+
+.gallery-grid{
+display:grid;grid-template-columns:repeat(4,1fr);gap:8px
+}
+
+.gallery-item{
+width:100%;aspect-ratio:1/1;object-fit:cover;
+border-radius:5px;cursor:pointer;opacity:.75;
+border:3px solid transparent
+}
+
+.gallery-item.active{
+opacity:1;border:3px solid white
+}
+
+.thumbs{
+position:fixed;bottom:0;left:0;right:0;background:#181818;
+display:flex;gap:6px;overflow-x:auto;padding:7px;
+z-index:20;border:1px solid #00ff44
+}
+
+.thumbs img{
+width:62px;height:62px;flex:0 0 62px;object-fit:cover;
+border-radius:5px;opacity:.55;cursor:pointer
+}
+
+.thumbs img.active{
+opacity:1;outline:2px solid white
+}
+
+/* Полный экран */
+
+#fullscreen{
+position:fixed;inset:0;width:100vw;height:100vh;
+background:rgba(0,0,0,.70);display:none;
+align-items:center;justify-content:center;
+z-index:99999;padding:5px;overflow:hidden;
+cursor:pointer;touch-action:manipulation
+}
+
+#fullscreen.show{display:flex}
+
+#fullscreen img{
+display:block;width:100vw;height:100vh;
+max-width:100vw;max-height:100vh;
+object-fit:contain;border-radius:3px;
+user-select:none;-webkit-user-drag:none;cursor:pointer
+}
+
+@media(max-width:600px){
+.gallery-grid{grid-template-columns:repeat(4,1fr);gap:5px}
+.gallery-item{border-width:2px}
+}
+</style>
+</head>
+
+<body>
+
+<header>
+<h1>Другие детали тоже нужны, тут собраны самые характерные.</h1>
+
+<div class="top-controls">
+<button onclick="previousPhoto()">← Назад</button>
+<div id="counter">Фото 1 из 80</div>
+<button onclick="nextPhoto()">Вперёд →</button>
+</div>
+</header>
+
+<div class="viewer">
+
+<div id="caption"></div>
+
+<div class="photo-container">
+<img id="photo" src="photos/001.jpg" alt="Фото 1">
+</div>
+
+</div>
+
+<div class="gallery" id="gallery"></div>
+
+<div class="thumbs" id="thumbs"></div>
+
+<div id="fullscreen">
+<img id="fullscreenPhoto" src="" alt="">
+</div>
+
+<script>
+
+/* ================================
+   НАСТРОЙКИ
+================================ */
+
+const TOTAL_PHOTOS=80;
+
+const extraPhotos={
+    68:["a","b"]
+};
+
+const captions={
+
+    1:"Турели",
+    6:"Крюк буксировочный",
+    10:"Танковая фара и маскировочные фонари",
+    24:"Ведущее колесо",
+    27:"Ленивец гусеничной техники, 50 см",
+    31:"Диск автомобиля",
+    35:"Пехотная тележка",
+    39:"Крепления инструмента и оружия",
+    43:"Крепления мотоциклетных ящиков",
+    48:"баки мотоциклов",
+    52:"Бронещит",
+    56:"Ящик мотоцикла",
+    61:"Характерные немецкие болты",
+    63:"Ленивцы танков",
+    65:"Колесо пехотные тележки",
+    66:"Траки полугусеничных машин и танков",
+    72:"Люк с красной грунтовкой",
+    73:"Вентиляционная решетка танка",
+    74:"Балансиры гусеничных машин",
+    78:"Поворотные кулаки",
+    79:"Петля люка",
+    80:"опорный каток"
+};
+
+
+/* ================================
+   ФАЙЛЫ
+================================ */
+
+const photoFiles=[];
+
+for(let i=1;i<=TOTAL_PHOTOS;i++){
+
+    const n=String(i).padStart(3,"0");
+
+    photoFiles.push(n+".jpg");
+
+    if(extraPhotos[i]){
+        extraPhotos[i].forEach(letter=>{
+            photoFiles.push(n+letter+".jpg");
+        });
+    }
+}
+
+
+/* ================================
+   ПОДПИСЬ
+================================ */
+
+function getCaption(index){
+
+    const file=photoFiles[index];
+
+    const match=file.match(/^(\d{3})/);
+
+    if(!match)return"";
+
+    const number=Number(match[1]);
+
+    let result="";
+
+    for(const start in captions){
+
+        if(Number(start)<=number){
+            result=captions[start];
+        }
+
+    }
+
+    return result;
+}
+
+
+/* ================================
+   МАССИВ ФОТО
+================================ */
+
+const photos=photoFiles.map((file,index)=>({
+
+    file:"photos/"+file,
+    filename:file,
+    number:index+1,
+    caption:getCaption(index)
+
+}));
+
+
+/* ================================
+   ЭЛЕМЕНТЫ
+================================ */
+
+let current=0;
+
+const photo=document.getElementById("photo");
+const caption=document.getElementById("caption");
+const counter=document.getElementById("counter");
+const thumbs=document.getElementById("thumbs");
+const gallery=document.getElementById("gallery");
+
+const fullscreen=document.getElementById("fullscreen");
+const fullscreenPhoto=document.getElementById("fullscreenPhoto");
+
+
+/* ================================
+   ПЛИТОЧНАЯ ГАЛЕРЕЯ
+================================ */
+
+let group=null;
+
+photos.forEach((item,index)=>{
+
+    if(group===null || group.caption!==item.caption){
+
+        group={
+            caption:item.caption,
+            container:document.createElement("div"),
+            grid:document.createElement("div")
+        };
+
+        group.container.className="gallery-group";
+
+        const title=document.createElement("div");
+
+        title.className="gallery-group-title";
+        title.textContent=item.caption;
+
+        group.grid.className="gallery-grid";
+
+        group.container.appendChild(title);
+        group.container.appendChild(group.grid);
+
+        gallery.appendChild(group.container);
+    }
+
+
+    const img=document.createElement("img");
+
+    img.src=item.file;
+    img.loading="lazy";
+    img.className="gallery-item";
+    img.alt=item.caption;
+
+    img.onclick=function(){
+
+        showPhoto(index);
+        openFullscreen(item.file);
+
+    };
+
+    group.grid.appendChild(img);
+
+});
+
+
+/* ================================
+   НИЖНЯЯ ЛЕНТА
+================================ */
+
+photos.forEach((item,index)=>{
+
+    const img=document.createElement("img");
+
+    img.src=item.file;
+    img.loading="lazy";
+
+    img.onclick=function(){
+
+        showPhoto(index);
+
+    };
+
+    thumbs.appendChild(img);
+
+});
+
+
+/* ================================
+   РАЗМЕР ОСНОВНОЙ ФОТОГРАФИИ
+================================ */
+
+function fitPhotoToScreen(){
+
+    const headerHeight=
+        document.querySelector("header").offsetHeight;
+
+    const captionHeight=
+        caption.offsetHeight;
+
+    const availableHeight=
+        window.innerHeight-
+        headerHeight-
+        captionHeight-
+        55;
+
+    photo.style.width="100%";
+    photo.style.height="auto";
+    photo.style.maxHeight="none";
+
+    if(!photo.naturalWidth||!photo.naturalHeight)return;
+
+    const availableWidth=
+        photo.parentElement.clientWidth;
+
+    const displayHeight=
+        availableWidth*
+        photo.naturalHeight/
+        photo.naturalWidth;
+
+    if(displayHeight>availableHeight){
+
+        photo.style.width="auto";
+        photo.style.height=availableHeight+"px";
+        photo.style.maxWidth="100%";
+
+    }
+
+}
+
+
+/* ================================
+   ПОКАЗ ФОТО
+================================ */
+
+function showPhoto(index){
+
+    if(index<0){
+        index=photos.length-1;
+    }
+
+    if(index>=photos.length){
+        index=0;
+    }
+
+    current=index;
+
+    const item=photos[current];
+
+    photo.style.transition="none";
+    photo.style.transform="translateX(0)";
+
+    photo.src=item.file;
+    photo.alt=item.caption;
+
+    caption.textContent=item.caption;
+
+    counter.textContent=
+        "Фото "+(current+1)+" из "+photos.length;
+
+
+    photo.onload=function(){
+        fitPhotoToScreen();
+    };
+
+
+    /* Нижняя лента */
+
+    document.querySelectorAll(".thumbs img")
+    .forEach((img,i)=>{
+
+        img.classList.toggle(
+            "active",
+            i===current
+        );
+
+    });
+
+
+    const activeThumb=
+        thumbs.children[current];
+
+    if(activeThumb){
+
+        activeThumb.scrollIntoView({
+
+            behavior:"smooth",
+            inline:"center",
+            block:"nearest"
+
+        });
+
+    }
+
+
+    /* Плиточная галерея */
+
+    document.querySelectorAll(".gallery-item")
+    .forEach((img,i)=>{
+
+        img.classList.toggle(
+            "active",
+            i===current
+        );
+
+    });
+
+}
+
+
+/* ================================
+   НАВИГАЦИЯ
+================================ */
+
+function nextPhoto(){
+
+    showPhoto(current+1);
+
+}
+
+function previousPhoto(){
+
+    showPhoto(current-1);
+
+}
+
+
+/* ================================
+   ПОЛНЫЙ ЭКРАН
+================================ */
+
+function openFullscreen(file){
+
+    fullscreenPhoto.src=file;
+
+    fullscreen.classList.add("show");
+
+    document.body.style.overflow="hidden";
+
+
+    if(!history.state ||
+       history.state.fullscreen!==true){
+
+        history.pushState(
+            {fullscreen:true},
+            "",
+            location.href
+        );
+
+    }
+
+}
+
+
+function closeFullscreen(){
+
+    if(!fullscreen.classList.contains("show")){
+        return;
+    }
+
+    fullscreen.classList.remove("show");
+
+    fullscreenPhoto.src="";
+
+    document.body.style.overflow="";
+
+}
+
+
+/* Клик по фотографии */
+
+photo.addEventListener("click",function(){
+
+    openFullscreen(
+        photos[current].file
+    );
+
+});
+
+
+/* Клик по полноэкранному окну */
+
+fullscreen.addEventListener("click",function(){
+
+    closeFullscreen();
+
+});
+
+
+/* ================================
+   КНОПКА ANDROID НАЗАД
+================================ */
+
+window.addEventListener("popstate",function(){
+
+    if(fullscreen.classList.contains("show")){
+
+        closeFullscreen();
+
+    }
+
+});
+
+
+/* ================================
+   RESIZE
+================================ */
+
+window.addEventListener("resize",function(){
+
+    fitPhotoToScreen();
+
+});
+
+
+/* ================================
+   КЛАВИАТУРА
+================================ */
+
+document.addEventListener("keydown",function(event){
+
+    if(
+        event.key==="Escape" &&
+        fullscreen.classList.contains("show")
+    ){
+
+        closeFullscreen();
+        return;
+
+    }
+
+    if(event.key==="ArrowRight"){
+        nextPhoto();
+    }
+
+    if(event.key==="ArrowLeft"){
+        previousPhoto();
+    }
+
+});
+
+
+/* =================================================
+   СВАЙП — ТОЛЬКО ОСНОВНАЯ ФОТОГРАФИЯ
+================================================= */
+
+let touchStartX=0;
+let touchStartY=0;
+let touchCurrentX=0;
+let touching=false;
+
+
+photo.addEventListener(
+"touchstart",
+function(event){
+
+    if(
+        fullscreen.classList.contains("show")
+    ){
+        return;
+    }
+
+    touchStartX=
+        event.touches[0].clientX;
+
+    touchStartY=
+        event.touches[0].clientY;
+
+    touchCurrentX=touchStartX;
+
+    touching=true;
+
+    photo.style.transition="none";
+
+},
+{passive:true}
+);
+
+
+photo.addEventListener(
+"touchmove",
+function(event){
+
+    if(!touching)return;
+
+    touchCurrentX=
+        event.touches[0].clientX;
+
+    const dx=
+        touchCurrentX-touchStartX;
+
+    const dy=
+        event.touches[0].clientY-touchStartY;
+
+
+    /*
+       Только горизонтальное движение.
+    */
+
+    if(Math.abs(dx)<=Math.abs(dy)){
+        return;
+    }
+
+
+    /*
+       Фотография немного следует
+       за пальцем.
+    */
+
+    photo.style.transform=
+        "translateX("+(dx*0.45)+"px)";
+
+},
+{passive:true}
+);
+
+
+photo.addEventListener(
+"touchend",
+function(){
+
+    if(!touching)return;
+
+    touching=false;
+
+    const dx=
+        touchCurrentX-touchStartX;
+
+
+    /*
+       Свайп слишком короткий —
+       просто возвращаем фотографию.
+    */
+
+    if(Math.abs(dx)<60){
+
+        photo.style.transition=
+            "transform .20s ease";
+
+        photo.style.transform=
+            "translateX(0)";
+
+        return;
+    }
+
+
+    const direction=
+        dx<0 ? -1 : 1;
+
+
+    /*
+       Сначала красиво уводим
+       старую фотографию.
+    */
+
+    photo.style.transition=
+        "transform .18s ease";
+
+    photo.style.transform=
+        "translateX("+
+        (direction*window.innerWidth)+
+        "px)";
+
+
+    setTimeout(function(){
+
+        /*
+           Переключаем фотографию
+           обычным рабочим методом.
+        */
+
+        if(direction<0){
+            nextPhoto();
+        }
+        else{
+            previousPhoto();
+        }
+
+
+        /*
+           После загрузки новой фотографии
+           ставим её с противоположной стороны.
+        */
+
+        photo.style.transition="none";
+
+        photo.style.transform=
+            "translateX("+
+            (-direction*window.innerWidth)+
+            "px)";
+
+
+        /*
+           Затем плавно вводим её.
+        */
+
+        requestAnimationFrame(function(){
+
+            photo.style.transition=
+                "transform .22s ease";
+
+            photo.style.transform=
+                "translateX(0)";
+
+        });
+
+    },180);
+
+},
+{passive:true}
+);
+
+
+/* ================================
+   ЗАПУСК
+================================ */
+
+showPhoto(0);
+
+</script>
+
+</body>
+  </html>
