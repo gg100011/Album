@@ -1,1 +1,682 @@
 
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Фотоальбом</title>
+
+<style>
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    background: #111;
+    color: white;
+    font-family: Arial, sans-serif;
+}
+
+header {
+    text-align: center;
+    padding: 15px;
+    background: #181818;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+}
+
+h1 {
+    margin: 0 0 5px;
+    font-size: 21px;
+}
+
+#counter {
+    color: #aaa;
+    font-size: 14px;
+}
+
+.viewer {
+
+    min-height: calc(100vh - 80px);
+
+    padding:
+        15px
+        10px
+        100px;
+
+    display: flex;
+
+    flex-direction: column;
+
+    align-items: center;
+
+    justify-content: center;
+}
+
+#photo {
+
+    max-width: 100%;
+
+    max-height: 68vh;
+
+    object-fit: contain;
+
+    border-radius: 5px;
+
+    user-select: none;
+
+    -webkit-user-drag: none;
+}
+
+#caption {
+
+    width: 100%;
+
+    max-width: 900px;
+
+    text-align: center;
+
+    font-size: 18px;
+
+    line-height: 1.5;
+
+    margin-top: 15px;
+
+    padding: 0 10px;
+
+    color: #eee;
+}
+
+.controls {
+
+    display: flex;
+
+    gap: 10px;
+
+    margin-top: 15px;
+}
+
+button {
+
+    background: #303030;
+
+    color: white;
+
+    border: none;
+
+    border-radius: 10px;
+
+    padding: 12px 22px;
+
+    font-size: 16px;
+}
+
+button:active {
+
+    transform: scale(.96);
+}
+
+.thumbs {
+
+    position: fixed;
+
+    bottom: 0;
+
+    left: 0;
+
+    right: 0;
+
+    background: #181818;
+
+    display: flex;
+
+    gap: 6px;
+
+    overflow-x: auto;
+
+    padding: 7px;
+
+    z-index: 20;
+}
+
+.thumbs img {
+
+    width: 62px;
+
+    height: 62px;
+
+    flex: 0 0 62px;
+
+    object-fit: cover;
+
+    border-radius: 5px;
+
+    opacity: .55;
+}
+
+.thumbs img.active {
+
+    opacity: 1;
+
+    outline: 2px solid white;
+}
+
+</style>
+
+</head>
+
+
+<body>
+
+
+<header>
+
+<h1>Фотоальбом</h1>
+
+<div id="counter">
+Фото 1 из 80
+</div>
+
+</header>
+
+
+
+<div class="viewer">
+
+
+<img
+    id="photo"
+    src="photos/001.jpg"
+    alt="Фото 1"
+>
+
+
+<div id="caption">
+</div>
+
+
+<div class="controls">
+
+<button onclick="previousPhoto()">
+← Назад
+</button>
+
+<button onclick="nextPhoto()">
+Вперёд →
+</button>
+
+</div>
+
+
+</div>
+
+
+
+<div
+    class="thumbs"
+    id="thumbs">
+</div>
+
+
+
+<script>
+
+
+/*
+====================================================
+НАСТРОЙКА ПОДПИСЕЙ
+====================================================
+
+Здесь ты указываешь ТОЛЬКО НАЧАЛО каждой группы.
+
+Например:
+
+1  = фотографии 1–5
+6  = фотографии 6–8
+9  = фотографии 9–14
+15 = фотографии 15–...
+
+Не нужно писать подпись для каждой фотографии.
+====================================================
+*/
+
+
+const captions = {
+
+    1: "Турели",
+
+    6: "Фары",
+
+    9: "Глушители",
+
+    15: "Капоты"
+
+};
+
+
+/*
+====================================================
+КОЛИЧЕСТВО ФОТОГРАФИЙ
+====================================================
+*/
+
+const TOTAL_PHOTOS = 80;
+
+
+
+/*
+====================================================
+СОЗДАНИЕ СПИСКА ФОТОГРАФИЙ
+====================================================
+*/
+
+const photos = [];
+
+
+
+for (let i = 1; i <= TOTAL_PHOTOS; i++) {
+
+    const number =
+        String(i).padStart(3, "0");
+
+
+    photos.push({
+
+        file:
+            "photos/" +
+            number +
+            ".jpg",
+
+        number:
+            i,
+
+        caption:
+            getCaption(i)
+
+    });
+
+}
+
+
+
+/*
+====================================================
+ФУНКЦИЯ ПОЛУЧЕНИЯ ПОДПИСИ
+====================================================
+
+Она ищет ближайшую предыдущую
+заданную подпись.
+
+Например:
+
+для фотографии 4:
+
+есть 1 = Турели
+
+значит:
+4 → Турели
+
+
+для фотографии 7:
+
+есть:
+1 = Турели
+6 = Фары
+
+значит:
+7 → Фары
+====================================================
+*/
+
+
+function getCaption(photoNumber) {
+
+    let currentCaption = "";
+
+
+    for (const start in captions) {
+
+        const startNumber =
+            Number(start);
+
+
+        if (startNumber <= photoNumber) {
+
+            currentCaption =
+                captions[start];
+
+        }
+
+    }
+
+
+    return currentCaption;
+
+}
+
+
+
+/*
+====================================================
+ТЕКУЩАЯ ФОТОГРАФИЯ
+====================================================
+*/
+
+let current = 0;
+
+
+
+const photo =
+    document.getElementById("photo");
+
+
+const caption =
+    document.getElementById("caption");
+
+
+const counter =
+    document.getElementById("counter");
+
+
+const thumbs =
+    document.getElementById("thumbs");
+
+
+
+/*
+====================================================
+ПОКАЗАТЬ ФОТОГРАФИЮ
+====================================================
+*/
+
+function showPhoto(index) {
+
+
+    if (index < 0) {
+
+        index =
+            photos.length - 1;
+
+    }
+
+
+    if (index >= photos.length) {
+
+        index = 0;
+
+    }
+
+
+    current = index;
+
+
+    const item =
+        photos[current];
+
+
+    photo.src =
+        item.file;
+
+
+    photo.alt =
+        item.caption;
+
+
+    caption.textContent =
+        item.caption;
+
+
+    counter.textContent =
+        "Фото " +
+        (current + 1) +
+        " из " +
+        photos.length;
+
+
+
+    document
+        .querySelectorAll(".thumbs img")
+        .forEach((img, i) => {
+
+            img.classList.toggle(
+
+                "active",
+
+                i === current
+
+            );
+
+        });
+
+
+}
+
+
+
+/*
+====================================================
+СЛЕДУЮЩАЯ ФОТОГРАФИЯ
+====================================================
+*/
+
+function nextPhoto() {
+
+    showPhoto(
+        current + 1
+    );
+
+}
+
+
+
+/*
+====================================================
+ПРЕДЫДУЩАЯ ФОТОГРАФИЯ
+====================================================
+*/
+
+function previousPhoto() {
+
+    showPhoto(
+        current - 1
+    );
+
+}
+
+
+
+/*
+====================================================
+МИНИАТЮРЫ
+====================================================
+*/
+
+photos.forEach(
+    (item, index) => {
+
+
+        const img =
+            document.createElement("img");
+
+
+        img.src =
+            item.file;
+
+
+        img.loading =
+            "lazy";
+
+
+        img.onclick =
+            function() {
+
+                showPhoto(index);
+
+            };
+
+
+        thumbs.appendChild(img);
+
+
+    }
+);
+
+
+
+/*
+====================================================
+КЛАВИАТУРА
+====================================================
+*/
+
+document.addEventListener(
+    "keydown",
+    function(event) {
+
+
+        if (
+            event.key ===
+            "ArrowRight"
+        ) {
+
+            nextPhoto();
+
+        }
+
+
+        if (
+            event.key ===
+            "ArrowLeft"
+        ) {
+
+            previousPhoto();
+
+        }
+
+
+    }
+);
+
+
+
+/*
+====================================================
+ЛИСТАНИЕ ПАЛЬЦЕМ
+====================================================
+*/
+
+let startX = 0;
+
+let startY = 0;
+
+
+
+photo.addEventListener(
+
+    "touchstart",
+
+    function(event) {
+
+
+        startX =
+            event.changedTouches[0]
+            .screenX;
+
+
+        startY =
+            event.changedTouches[0]
+            .screenY;
+
+
+    },
+
+    {
+        passive: true
+    }
+
+);
+
+
+
+photo.addEventListener(
+
+    "touchend",
+
+    function(event) {
+
+
+        const endX =
+            event.changedTouches[0]
+            .screenX;
+
+
+        const endY =
+            event.changedTouches[0]
+            .screenY;
+
+
+        const differenceX =
+            endX - startX;
+
+
+        const differenceY =
+            endY - startY;
+
+
+
+        if (
+
+            Math.abs(differenceX) > 60 &&
+
+            Math.abs(differenceX) >
+            Math.abs(differenceY)
+
+        ) {
+
+
+            if (
+                differenceX < 0
+            ) {
+
+                nextPhoto();
+
+            }
+
+            else {
+
+                previousPhoto();
+
+            }
+
+
+        }
+
+
+    },
+
+    {
+        passive: true
+    }
+
+);
+
+
+
+/*
+====================================================
+ЗАПУСК
+====================================================
+*/
+
+showPhoto(0);
+
+
+</script>
+
+
+</body>
+</html>
